@@ -14,4 +14,5 @@ public interface IAttendanceService
     Task<ServiceResult<List<AttendanceReportDto>>> GetRecentActivityAsync();
     Task<ServiceResult<List<AttendanceRecordDto>>> GetCheckedInChildrenByParentAsync(Guid parentId);
     Task<ServiceResult<List<AttendanceRecordDto>>> CheckOutByParentAsync(Guid parentId, Guid staffId, string? notes = null);
+    Task<ServiceResult<AttendanceRecordDto>> CheckOutByChildAsync(Guid childId, Guid staffId, string? notes = null);
 }

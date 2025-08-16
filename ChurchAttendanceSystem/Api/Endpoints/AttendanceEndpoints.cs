@@ -84,5 +84,16 @@ public static class AttendanceEndpoints
             var result = await attendanceService.CheckOutByParentAsync(dto.ParentId, staffId, dto.Notes);
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
+
+        group.MapPost("/checkout-by-child", async (CheckOutByChildDto dto, ClaimsPrincipal user, IAttendanceService attendanceService) =>
+        {
+            var staffIdStr = user.FindFirstValue("uid");
+            if (staffIdStr is null) 
+                return Results.Unauthorized();
+
+            var staffId = Guid.Parse(staffIdStr);
+            var result = await attendanceService.CheckOutByChildAsync(dto.ChildId, staffId, dto.Notes);
+            return result.ToHttpResult();
+        }).RequireAuthorization("Staff");
     }
 }

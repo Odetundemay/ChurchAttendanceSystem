@@ -285,4 +285,39 @@ public class AttendanceService : IAttendanceService
 
         return ServiceResult<List<AttendanceRecordDto>>.Success(recordDtos);
     }
+
+    public async Task<ServiceResult<AttendanceRecordDto>> CheckOutByChildAsync(Guid childId, Guid staffId, string? notes = null)
+    {
+        var today = DateTime.UtcNow.Date;
+        var record = await _db.AttendanceRecords
+            .Where(r => r.ChildId == childId && 
+                       r.CheckInTime.Date == today && 
+                       r.CheckOutTime == null)
+            .Include(r => r.Child)
+            .Include(r => r.Parent)
+            .FirstOrDefaultAsync();
+
+        if (record == null)
+            return ServiceResult<AttendanceRecordDto>.Failure("Child is not currently checked in");
+
+        record.CheckOutTime = DateTime.UtcNow;
+        record.CheckOutNotes = notes;
+        record.CheckOutStaffId = staffId;
+
+        await _db.SaveChangesAsync();
+
+        var recordDto = new AttendanceRecordDto(
+            record.Id.ToString(),
+            $"{_encryption.Decrypt(record.Child.FirstName)} {_encryption.Decrypt(record.Child.LastName)}",
+            $"{record.Parent.FirstName} {record.Parent.LastName}",
+            record.CheckInTime,
+            record.CheckOutTime,
+            record.CheckInStaffId.ToString(),
+            record.CheckOutStaffId?.ToString(),
+            record.CheckOutNotes,
+            record.CheckInTime.ToString("yyyy-MM-dd")
+        );
+
+        return ServiceResult<AttendanceRecordDto>.Success(recordDto);
+    }
 }
