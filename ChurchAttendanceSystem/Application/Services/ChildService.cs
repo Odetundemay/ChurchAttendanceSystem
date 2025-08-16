@@ -27,6 +27,7 @@ public class ChildService : IChildService
                 c.Id,
                 _encryption.Decrypt(c.FirstName),
                 _encryption.Decrypt(c.LastName),
+                _encryption.Decrypt(c.Gender),
                 c.DateOfBirth,
                 new List<string> { c.ParentId.ToString() },
                 _encryption.Decrypt(c.Allergies ?? ""),
@@ -50,11 +51,12 @@ public class ChildService : IChildService
             ParentId = parentId,
             FirstName = _encryption.Encrypt(dto.FirstName),
             LastName = _encryption.Encrypt(dto.LastName),
+            Gender = _encryption.Encrypt(dto.Gender),
             DateOfBirth = dto.DateOfBirth ?? "2020-01-01",
             Allergies = _encryption.Encrypt(dto.Allergies ?? ""),
             EmergencyContact = _encryption.Encrypt(dto.EmergencyContact ?? ""),
             MedicalNotes = _encryption.Encrypt(dto.MedicalNotes ?? ""),
-            PhotoUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(dto.FirstName)}",
+            PhotoUrl = dto.ImageUrl ?? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(dto.FirstName)}",
             IsActive = true
         };
 

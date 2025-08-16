@@ -7,8 +7,10 @@ public class Parent
     [Key] public Guid Id { get; set; }
     [Required] public string FirstName { get; set; } = default!;
     [Required] public string LastName { get; set; } = default!;
+    [Required] public string Gender { get; set; } = default!;
     public string Phone { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
     [Required] public string QrSecret { get; set; } = default!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Child> Children { get; set; } = new List<Child>();
@@ -21,6 +23,7 @@ public class Child
     public Parent Parent { get; set; } = default!;
     [Required] public string FirstName { get; set; } = default!;
     [Required] public string LastName { get; set; } = default!;
+    [Required] public string Gender { get; set; } = default!;
     public string DateOfBirth { get; set; } = "2020-01-01";
     public string? Allergies { get; set; }
     public string? EmergencyContact { get; set; }

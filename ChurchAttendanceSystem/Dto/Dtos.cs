@@ -17,16 +17,20 @@ public record LoginDto(
 public record CreateParentDto(
     [Required] string FirstName,
     [Required] string LastName,
+    [Required] string Gender,
     string Phone, 
-    [EmailAddress] string Email);
+    [EmailAddress] string Email,
+    string? ImageUrl);
 
 public record CreateChildDto(
     [Required] string FirstName,
     [Required] string LastName,
+    [Required] string Gender,
     string DateOfBirth,
     string? Allergies,
     string? EmergencyContact,
-    string? MedicalNotes);
+    string? MedicalNotes,
+    string? ImageUrl);
 
 public record ScanDto([Required] string QrData);
 
@@ -40,8 +44,8 @@ public record MarkAttendanceDto(
     [Required] string Action); // CheckIn | CheckOut
 
 public record ScanResultDto(ParentInfoDto Parent, List<ChildInfoDto> Children);
-public record ParentInfoDto(Guid Id, string FirstName, string LastName, string Phone, string Email, string QrCode, List<string> ChildIds);
-public record ChildInfoDto(Guid Id, string FirstName, string LastName, string DateOfBirth, List<string> ParentIds, string? Allergies, string? EmergencyContact, string? MedicalNotes, string PhotoUrl);
+public record ParentInfoDto(Guid Id, string FirstName, string LastName, string Gender, string Phone, string Email, string QrCode, List<string> ChildIds, string? ImageUrl);
+public record ChildInfoDto(Guid Id, string FirstName, string LastName, string Gender, string DateOfBirth, List<string> ParentIds, string? Allergies, string? EmergencyContact, string? MedicalNotes, string PhotoUrl);
 
 public record AttendanceRecordDto(
     string Id,

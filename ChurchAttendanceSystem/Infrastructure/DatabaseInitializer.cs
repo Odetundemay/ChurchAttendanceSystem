@@ -11,7 +11,7 @@ public static class DatabaseInitializer
         using var scope = serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDb>();
         var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        
+        await db.Database.EnsureDeletedAsync();
         await db.Database.EnsureCreatedAsync();
         
         if (!await db.StaffUsers.AnyAsync())
@@ -43,6 +43,7 @@ public static class DatabaseInitializer
                 Id = Guid.Parse("b2a4fe8b-a30c-4f00-8c99-b0fd75c6a106"),
                 FirstName = "John",
                 LastName = "Smith",
+                Gender = "Male",
                 Phone = "555-0123",
                 Email = "john.smith@example.com",
                 QrSecret = "dGVzdFNlY3JldA=="
@@ -54,6 +55,7 @@ public static class DatabaseInitializer
                 ParentId = testParent.Id,
                 FirstName = "Emma",
                 LastName = "Smith",
+                Gender = "Female",
                 DateOfBirth = "2018-05-15"
             };
             

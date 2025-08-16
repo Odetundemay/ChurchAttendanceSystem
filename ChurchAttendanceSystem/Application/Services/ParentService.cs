@@ -30,10 +30,12 @@ public class ParentService : IParentService
             p.Id,
             p.FirstName,
             p.LastName,
+            p.Gender,
             p.Phone,
             p.Email,
             System.Text.Json.JsonSerializer.Serialize(new { family = p.Id, s = p.QrSecret }),
-            p.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList()
+            p.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList(),
+            p.ImageUrl
         )).ToList();
 
         return ServiceResult<List<ParentInfoDto>>.Success(parents);
@@ -46,8 +48,10 @@ public class ParentService : IParentService
             Id = Guid.NewGuid(),
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
+            Gender = dto.Gender,
             Phone = dto.Phone,
             Email = dto.Email,
+            ImageUrl = dto.ImageUrl,
             QrSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16)),
             CreatedAt = DateTime.UtcNow
         };
@@ -98,15 +102,18 @@ public class ParentService : IParentService
                     parent.Id, 
                     parent.FirstName,
                     parent.LastName,
+                    parent.Gender,
                     parent.Phone, 
                     parent.Email, 
                     dto.QrData,
-                    parent.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList()
+                    parent.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList(),
+                    parent.ImageUrl
                 ),
                 parent.Children.Where(c => c.IsActive).Select(c => new ChildInfoDto(
                     c.Id, 
                     _encryption.Decrypt(c.FirstName),
                     _encryption.Decrypt(c.LastName),
+                    _encryption.Decrypt(c.Gender),
                     c.DateOfBirth,
                     new List<string> { parent.Id.ToString() },
                     _encryption.Decrypt(c.Allergies ?? ""),
