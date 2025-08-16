@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
+namespace ChurchAttendanceSystem.Application;
+
 public static class Jwt
 {
     public static string IssueToken(Guid userId, string email, string role, IConfiguration cfg)

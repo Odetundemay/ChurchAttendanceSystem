@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+namespace ChurchAttendanceSystem.Domain;
+
 public class Parent
 {
     [Key] public Guid Id { get; set; }

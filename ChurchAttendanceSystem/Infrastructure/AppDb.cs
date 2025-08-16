@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using ChurchAttendanceSystem.Domain;
+
+namespace ChurchAttendanceSystem.Infrastructure;
 
 public class AppDb : DbContext
 {

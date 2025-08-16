@@ -1,6 +1,8 @@
 using System.Text.Json;
 using QRCoder;
 
+namespace ChurchAttendanceSystem.Application;
+
 public interface IQrService { byte[] GeneratePng(object payload); }
 public class QrService : IQrService
 {

@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
+namespace ChurchAttendanceSystem.Application;
+
 public static class Password
 {
     public static string Hash(string password)
