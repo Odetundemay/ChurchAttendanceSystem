@@ -32,6 +32,7 @@ public record ScanDto([Required] string QrData);
 
 public record CheckInDto([Required] string ChildId, string? Notes);
 public record CheckOutDto([Required] string RecordId, string? Notes);
+public record CheckOutByParentDto([Required] Guid ParentId, string? Notes);
 
 public record MarkAttendanceDto(
     [Required] List<Guid> ChildIds, 
