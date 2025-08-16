@@ -10,8 +10,9 @@ public static class ScanEndpoints
     {
         var group = app.MapGroup("/api").WithTags("QR Scanning");
 
-        group.MapPost("/scan", async (ScanDto dto, IParentService parentService) =>
+        group.MapPost("/scan", async (ScanDto dto, IParentService parentService, HttpContext context) =>
         {
+            context.Response.Headers.Add("X-Bypass-Encryption", "true");
             var result = await parentService.ScanQrCodeAsync(dto);
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");

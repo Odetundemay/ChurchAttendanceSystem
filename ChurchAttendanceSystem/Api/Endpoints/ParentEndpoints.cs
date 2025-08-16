@@ -28,6 +28,10 @@ public static class ParentEndpoints
             return result.ToHttpResult();
         }).RequireAuthorization("AdminOnly");
 
-
+        group.MapDelete("/{id:guid}", async (Guid id, IParentService parentService) =>
+        {
+            var result = await parentService.DeleteParentAsync(id);
+            return result.ToHttpResult();
+        }).RequireAuthorization("AdminOnly");
     }
 }

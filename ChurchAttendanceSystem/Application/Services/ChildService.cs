@@ -63,4 +63,16 @@ public class ChildService : IChildService
 
         return ServiceResult<Guid>.Success(child.Id, 201);
     }
+
+    public async Task<ServiceResult> DeleteChildAsync(Guid childId)
+    {
+        var child = await _db.Children.FindAsync(childId);
+        if (child is null)
+            return ServiceResult.NotFound("Child not found");
+
+        _db.Children.Remove(child);
+        await _db.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
 }

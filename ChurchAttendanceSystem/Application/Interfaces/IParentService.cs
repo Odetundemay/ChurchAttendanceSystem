@@ -9,4 +9,5 @@ public interface IParentService
     Task<ServiceResult<Guid>> CreateParentAsync(CreateParentDto dto);
     Task<ServiceResult<object>> GetQrDataAsync(Guid parentId);
     Task<ServiceResult<ScanResultDto>> ScanQrCodeAsync(ScanDto dto);
+    Task<ServiceResult> DeleteParentAsync(Guid parentId);
 }

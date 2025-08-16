@@ -81,9 +81,12 @@ public class ParentService : IParentService
             if (qrData == null)
                 return ServiceResult<ScanResultDto>.Failure("Invalid QR code format");
 
+            if (!Guid.TryParse(qrData.family, out var familyId))
+                return ServiceResult<ScanResultDto>.Failure("Invalid family ID format");
+
             var parent = await _db.Parents
                 .Include(p => p.Children.Where(k => k.IsActive))
-                .FirstOrDefaultAsync(p => p.Id == qrData.family && p.QrSecret == qrData.s);
+                .FirstOrDefaultAsync(p => p.Id == familyId && p.QrSecret == qrData.s);
 
             if (parent is null)
                 return ServiceResult<ScanResultDto>.Failure("Invalid QR code");
@@ -119,5 +122,18 @@ public class ParentService : IParentService
         }
     }
 
-    private record QrPayload(Guid family, string s);
+    public async Task<ServiceResult> DeleteParentAsync(Guid parentId)
+    {
+        var parent = await _db.Parents.Include(p => p.Children).FirstOrDefaultAsync(p => p.Id == parentId);
+        if (parent is null)
+            return ServiceResult.NotFound("Parent not found");
+
+        _db.Children.RemoveRange(parent.Children);
+        _db.Parents.Remove(parent);
+        await _db.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
+
+    private record QrPayload(string family, string s);
 }

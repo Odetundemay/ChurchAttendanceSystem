@@ -16,6 +16,12 @@ public static class ChildEndpoints
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
 
+        group.MapDelete("/{id:guid}", async (Guid id, IChildService childService) =>
+        {
+            var result = await childService.DeleteChildAsync(id);
+            return result.ToHttpResult();
+        }).RequireAuthorization("AdminOnly");
+
         // Also add under parents for creating children
         var parentGroup = app.MapGroup("/api/parents").WithTags("Children");
         parentGroup.MapPost("/{parentId:guid}/children", async (Guid parentId, CreateChildDto dto, IChildService childService) =>
