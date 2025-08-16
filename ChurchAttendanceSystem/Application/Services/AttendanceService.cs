@@ -52,7 +52,9 @@ public class AttendanceService : IAttendanceService
         var recordDto = new AttendanceRecordDto(
             record.Id.ToString(),
             record.ChildId.ToString(),
+            $"{_encryption.Decrypt(child.FirstName)} {_encryption.Decrypt(child.LastName)}",
             record.ParentId.ToString(),
+            $"{child.Parent.FirstName} {child.Parent.LastName}",
             record.CheckInTime,
             record.CheckOutTime,
             record.CheckInStaffId.ToString(),
@@ -69,7 +71,10 @@ public class AttendanceService : IAttendanceService
         if (!Guid.TryParse(dto.RecordId, out var recordId))
             return ServiceResult<AttendanceRecordDto>.Failure("Invalid record ID");
 
-        var record = await _db.AttendanceRecords.FirstOrDefaultAsync(r => r.Id == recordId);
+        var record = await _db.AttendanceRecords
+            .Include(r => r.Child)
+            .Include(r => r.Parent)
+            .FirstOrDefaultAsync(r => r.Id == recordId);
         if (record == null)
             return ServiceResult<AttendanceRecordDto>.Failure("Attendance record not found");
 
@@ -85,7 +90,9 @@ public class AttendanceService : IAttendanceService
         var recordDto = new AttendanceRecordDto(
             record.Id.ToString(),
             record.ChildId.ToString(),
+            $"{_encryption.Decrypt(record.Child.FirstName)} {_encryption.Decrypt(record.Child.LastName)}",
             record.ParentId.ToString(),
+            $"{record.Parent.FirstName} {record.Parent.LastName}",
             record.CheckInTime,
             record.CheckOutTime,
             record.CheckInStaffId.ToString(),
@@ -107,7 +114,9 @@ public class AttendanceService : IAttendanceService
 
         var records = recordsData.Select(r => new AttendanceRecordDto(
             r.Id.ToString(),
+            r.ChildId.ToString(),
             $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}",
+            r.ParentId.ToString(),
             $"{r.Parent.FirstName} {r.Parent.LastName}",
             r.CheckInTime,
             r.CheckOutTime,
@@ -171,7 +180,7 @@ public class AttendanceService : IAttendanceService
             x.TimestampUtc,
             $"{_encryption.Decrypt(x.Child.FirstName)} {_encryption.Decrypt(x.Child.LastName)}",
             $"{x.Child.Parent.FirstName} {x.Child.Parent.LastName}",
-            "General" // Default group since we removed Group field
+            "General"
         )).ToList();
 
         return ServiceResult<List<AttendanceReportDto>>.Success(logs);
@@ -189,7 +198,9 @@ public class AttendanceService : IAttendanceService
 
         var records = recordsData.Select(r => new AttendanceRecordDto(
             r.Id.ToString(),
+            r.ChildId.ToString(),
             $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}",
+            r.ParentId.ToString(),
             $"{r.Parent.FirstName} {r.Parent.LastName}",
             r.CheckInTime,
             r.CheckOutTime,
@@ -235,7 +246,9 @@ public class AttendanceService : IAttendanceService
 
         var records = recordsData.Select(r => new AttendanceRecordDto(
             r.Id.ToString(),
+            r.ChildId.ToString(),
             $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}",
+            r.ParentId.ToString(),
             $"{r.Parent.FirstName} {r.Parent.LastName}",
             r.CheckInTime,
             r.CheckOutTime,
@@ -273,7 +286,9 @@ public class AttendanceService : IAttendanceService
 
         var recordDtos = records.Select(r => new AttendanceRecordDto(
             r.Id.ToString(),
+            r.ChildId.ToString(),
             $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}",
+            r.ParentId.ToString(),
             $"{r.Parent.FirstName} {r.Parent.LastName}",
             r.CheckInTime,
             r.CheckOutTime,
@@ -308,7 +323,9 @@ public class AttendanceService : IAttendanceService
 
         var recordDto = new AttendanceRecordDto(
             record.Id.ToString(),
+            record.ChildId.ToString(),
             $"{_encryption.Decrypt(record.Child.FirstName)} {_encryption.Decrypt(record.Child.LastName)}",
+            record.ParentId.ToString(),
             $"{record.Parent.FirstName} {record.Parent.LastName}",
             record.CheckInTime,
             record.CheckOutTime,

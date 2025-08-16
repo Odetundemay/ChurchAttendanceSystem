@@ -45,8 +45,10 @@ public record ChildInfoDto(Guid Id, string FirstName, string LastName, string Da
 
 public record AttendanceRecordDto(
     string Id,
-    string ChildId, 
+    string ChildId,
+    string ChildName,
     string ParentId,
+    string ParentName,
     DateTime CheckInTime,
     DateTime? CheckOutTime,
     string CheckInStaffId,
