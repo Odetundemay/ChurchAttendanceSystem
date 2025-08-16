@@ -49,4 +49,8 @@ public class ServiceResult
 
     public static ServiceResult Failure(string errorMessage, int statusCode = 400)
         => new(false, errorMessage, statusCode);
+    
+    public static ServiceResult NotFound(string errorMessage = "Resource not found")
+        => new(false, errorMessage, 404);
+
 }

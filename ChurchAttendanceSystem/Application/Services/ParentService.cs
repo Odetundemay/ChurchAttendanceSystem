@@ -11,11 +11,13 @@ public class ParentService : IParentService
 {
     private readonly AppDb _db;
     private readonly IQrService _qrService;
+    private readonly IEncryptionService _encryption;
 
-    public ParentService(AppDb db, IQrService qrService)
+    public ParentService(AppDb db, IQrService qrService, IEncryptionService encryption)
     {
         _db = db;
         _qrService = qrService;
+        _encryption = encryption;
     }
 
     public async Task<ServiceResult<List<ParentInfoDto>>> GetParentsAsync()
@@ -103,14 +105,14 @@ public class ParentService : IParentService
                 ),
                 parent.Children.Where(c => c.IsActive).Select(c => new ChildInfoDto(
                     c.Id, 
-                    c.FirstName,
-                    c.LastName,
+                    _encryption.Decrypt(c.FirstName),
+                    _encryption.Decrypt(c.LastName),
                     c.DateOfBirth,
                     new List<string> { parent.Id.ToString() },
-                    c.Allergies,
-                    c.EmergencyContact,
-                    c.MedicalNotes,
-                    string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(c.FirstName)}" : c.PhotoUrl
+                    _encryption.Decrypt(c.Allergies ?? ""),
+                    _encryption.Decrypt(c.EmergencyContact ?? ""),
+                    _encryption.Decrypt(c.MedicalNotes ?? ""),
+                    string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(_encryption.Decrypt(c.FirstName))}" : c.PhotoUrl
                 )).ToList()
             );
 

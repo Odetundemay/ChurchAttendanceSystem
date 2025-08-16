@@ -32,7 +32,7 @@ public class ChildService : IChildService
                 _encryption.Decrypt(c.Allergies ?? ""),
                 _encryption.Decrypt(c.EmergencyContact ?? ""),
                 _encryption.Decrypt(c.MedicalNotes ?? ""),
-                string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(c.FirstName)}" : c.PhotoUrl
+                string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(_encryption.Decrypt(c.FirstName))}" : c.PhotoUrl
             ))
             .ToListAsync();
 

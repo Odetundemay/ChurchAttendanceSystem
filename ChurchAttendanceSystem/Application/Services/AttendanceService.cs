@@ -9,10 +9,12 @@ namespace ChurchAttendanceSystem.Application.Services;
 public class AttendanceService : IAttendanceService
 {
     private readonly AppDb _db;
+    private readonly IEncryptionService _encryption;
 
-    public AttendanceService(AppDb db)
+    public AttendanceService(AppDb db, IEncryptionService encryption)
     {
         _db = db;
+        _encryption = encryption;
     }
 
     public async Task<ServiceResult<AttendanceRecordDto>> CheckInAsync(CheckInDto dto, Guid staffId)
@@ -150,7 +152,7 @@ public class AttendanceService : IAttendanceService
         var logs = logsData.Select(x => new AttendanceReportDto(
             x.Action,
             x.TimestampUtc,
-            $"{x.Child.FirstName} {x.Child.LastName}",
+            $"{_encryption.Decrypt(x.Child.FirstName)} {_encryption.Decrypt(x.Child.LastName)}",
             $"{x.Child.Parent.FirstName} {x.Child.Parent.LastName}",
             "General" // Default group since we removed Group field
         )).ToList();
