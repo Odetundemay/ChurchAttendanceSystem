@@ -1,0 +1,100 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Visual Studio Code
+.vscode/
+.vscode/*
+# macOS system files
+.DS_Store
+
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+*.vs/
+*.vcxproj.user
+*.rsuser
+
+# Rider
+.idea/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Cache and temporary files
+*.cache
+*.pdb
+*.tmp
+*.bak
+*.swp
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.nuproj
+project.lock.json
+artifacts/
+*.nuget.props
+*.nuget.targets
+.nuget/
+
+# ASP.NET
+wwwroot/lib/
+node_modules/
+bower_components/
+
+# Logs
+*.log
+*.tld
+*.pid
+
+# Publish
+/publish/
+/out/
+/dist/
+/deploy/
+
+# Database
+*.mdf
+*.ldf
+*.ndf
+
+# Secrets (don’t commit local secrets.json or env files)
+appsettings.Development.json
+appsettings.Local.json
+.env
+
+# Others
+*.dbmdl
+*.bak
+*.sql
+*.sqlite
+
+# Ignore build outputs
+**/bin/
+**/obj/
+
+# Ignore SQLite DB
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore system files
+.DS_Store
+
