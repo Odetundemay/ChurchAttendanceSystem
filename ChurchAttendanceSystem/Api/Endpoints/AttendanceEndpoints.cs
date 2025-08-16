@@ -26,7 +26,7 @@ public static class AttendanceEndpoints
             logger.LogInformation("CheckIn by staff: {StaffId}", staffId);
             
             var result = await attendanceService.CheckInAsync(dto, staffId);
-            logger.LogInformation("CheckIn result: Success={Success}, Error={Error}", result.Success, result.Error);
+            logger.LogInformation("CheckIn result: Success={Success}, Error={Error}", result.IsSuccess, result.ErrorMessage);
             
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
@@ -46,7 +46,7 @@ public static class AttendanceEndpoints
             logger.LogInformation("CheckOut by staff: {StaffId}", staffId);
             
             var result = await attendanceService.CheckOutAsync(dto, staffId);
-            logger.LogInformation("CheckOut result: Success={Success}, Error={Error}", result.Success, result.Error);
+            logger.LogInformation("CheckOut result: Success={Success}, Error={Error}", result.IsSuccess, result.ErrorMessage);
             
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
