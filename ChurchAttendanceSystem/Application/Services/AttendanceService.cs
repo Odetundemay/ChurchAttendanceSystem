@@ -22,6 +22,11 @@ public class AttendanceService : IAttendanceService
         if (!Guid.TryParse(dto.ChildId, out var childId))
             return ServiceResult<AttendanceRecordDto>.Failure("Invalid child ID");
 
+        // Verify staff user exists
+        var staffExists = await _db.StaffUsers.AnyAsync(s => s.Id == staffId);
+        if (!staffExists)
+            return ServiceResult<AttendanceRecordDto>.Failure("Staff user not found");
+
         var child = await _db.Children.Include(c => c.Parent).FirstOrDefaultAsync(c => c.Id == childId);
         if (child == null)
             return ServiceResult<AttendanceRecordDto>.Failure("Child not found");

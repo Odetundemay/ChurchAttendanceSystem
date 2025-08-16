@@ -11,7 +11,6 @@ public static class DatabaseInitializer
         using var scope = serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDb>();
         var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        await db.Database.EnsureDeletedAsync();
         await db.Database.EnsureCreatedAsync();
         
         if (!await db.StaffUsers.AnyAsync())
