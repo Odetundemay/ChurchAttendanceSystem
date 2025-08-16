@@ -28,6 +28,33 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    // Enable Swagger in production for debugging
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Add request logging
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Request: {Method} {Path} from {RemoteIp}", 
+        context.Request.Method, 
+        context.Request.Path, 
+        context.Connection.RemoteIpAddress);
+    
+    if (context.Request.Headers.ContainsKey("Authorization"))
+    {
+        logger.LogInformation("Has Authorization header");
+    }
+    else
+    {
+        logger.LogWarning("No Authorization header");
+    }
+    
+    await next();
+});
 
 app.UseCors("AllowFrontend");
 app.UseMiddleware<EncryptionMiddleware>();
@@ -36,7 +63,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Database initialization
-await DatabaseInitializer.InitializeAsync(app.Services);
+try
+{
+    await DatabaseInitializer.InitializeAsync(app.Services);
+    app.Logger.LogInformation("Database initialized successfully");
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Database initialization failed");
+    throw;
+}
 
 // Redirect root to Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));

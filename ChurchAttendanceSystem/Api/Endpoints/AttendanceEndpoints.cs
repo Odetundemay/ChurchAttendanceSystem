@@ -11,25 +11,43 @@ public static class AttendanceEndpoints
     {
         var group = app.MapGroup("/api/attendance").WithTags("Attendance");
 
-        group.MapPost("/checkin", async (CheckInDto dto, ClaimsPrincipal user, IAttendanceService attendanceService) =>
+        group.MapPost("/checkin", async (CheckInDto dto, ClaimsPrincipal user, IAttendanceService attendanceService, ILogger<Program> logger) =>
         {
+            logger.LogInformation("CheckIn attempt for childId: {ChildId}", dto.ChildId);
+            
             var staffIdStr = user.FindFirstValue("uid");
-            if (staffIdStr is null) 
+            if (staffIdStr is null)
+            {
+                logger.LogWarning("CheckIn failed: No staff ID in token");
                 return Results.Unauthorized();
+            }
 
             var staffId = Guid.Parse(staffIdStr);
+            logger.LogInformation("CheckIn by staff: {StaffId}", staffId);
+            
             var result = await attendanceService.CheckInAsync(dto, staffId);
+            logger.LogInformation("CheckIn result: Success={Success}, Error={Error}", result.Success, result.Error);
+            
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
 
-        group.MapPost("/checkout", async (CheckOutDto dto, ClaimsPrincipal user, IAttendanceService attendanceService) =>
+        group.MapPost("/checkout", async (CheckOutDto dto, ClaimsPrincipal user, IAttendanceService attendanceService, ILogger<Program> logger) =>
         {
+            logger.LogInformation("CheckOut attempt for recordId: {RecordId}", dto.RecordId);
+            
             var staffIdStr = user.FindFirstValue("uid");
-            if (staffIdStr is null) 
+            if (staffIdStr is null)
+            {
+                logger.LogWarning("CheckOut failed: No staff ID in token");
                 return Results.Unauthorized();
+            }
 
             var staffId = Guid.Parse(staffIdStr);
+            logger.LogInformation("CheckOut by staff: {StaffId}", staffId);
+            
             var result = await attendanceService.CheckOutAsync(dto, staffId);
+            logger.LogInformation("CheckOut result: Success={Success}, Error={Error}", result.Success, result.Error);
+            
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
 

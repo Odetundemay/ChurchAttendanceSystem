@@ -16,4 +16,9 @@ RUN dotnet publish "ChurchAttendanceSystem.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN mkdir -p /app/data && chmod 777 /app/data
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
+ENV ConnectionStrings__Default="Data Source=/app/data/church.db"
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV Logging__LogLevel__Default=Information
 ENTRYPOINT ["dotnet", "ChurchAttendanceSystem.dll"]

@@ -5,9 +5,14 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /health
-    port: 10000
+    disk:
+      name: church-data
+      mountPath: /app/data
+      sizeGB: 1
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: ASPNETCORE_URLS
         value: http://0.0.0.0:10000
+      - key: ConnectionStrings__Default
+        value: "Data Source=/app/data/church.db"
