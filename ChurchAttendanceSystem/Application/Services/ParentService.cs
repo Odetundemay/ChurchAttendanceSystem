@@ -18,12 +18,32 @@ public class ParentService : IParentService
         _qrService = qrService;
     }
 
+    public async Task<ServiceResult<List<ParentInfoDto>>> GetParentsAsync()
+    {
+        var parentsData = await _db.Parents
+            .Include(p => p.Children)
+            .ToListAsync();
+
+        var parents = parentsData.Select(p => new ParentInfoDto(
+            p.Id,
+            p.FirstName,
+            p.LastName,
+            p.Phone,
+            p.Email,
+            System.Text.Json.JsonSerializer.Serialize(new { family = p.Id, s = p.QrSecret }),
+            p.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList()
+        )).ToList();
+
+        return ServiceResult<List<ParentInfoDto>>.Success(parents);
+    }
+
     public async Task<ServiceResult<Guid>> CreateParentAsync(CreateParentDto dto)
     {
         var parent = new Parent
         {
             Id = Guid.NewGuid(),
-            FullName = dto.FullName.Trim(),
+            FirstName = dto.FirstName.Trim(),
+            LastName = dto.LastName.Trim(),
             Phone = dto.Phone,
             Email = dto.Email,
             QrSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16)),
@@ -50,18 +70,50 @@ public class ParentService : IParentService
 
     public async Task<ServiceResult<ScanResultDto>> ScanQrCodeAsync(ScanDto dto)
     {
-        var parent = await _db.Parents
-            .Include(p => p.Children.Where(k => k.IsActive))
-            .FirstOrDefaultAsync(p => p.Id == dto.Family && p.QrSecret == dto.S);
+        try
+        {
+            // Parse the QR data JSON
+            var qrData = System.Text.Json.JsonSerializer.Deserialize<QrPayload>(dto.QrData);
+            if (qrData == null)
+                return ServiceResult<ScanResultDto>.Failure("Invalid QR code format");
 
-        if (parent is null)
-            return ServiceResult<ScanResultDto>.Failure("Invalid QR code");
+            var parent = await _db.Parents
+                .Include(p => p.Children.Where(k => k.IsActive))
+                .FirstOrDefaultAsync(p => p.Id == qrData.family && p.QrSecret == qrData.s);
 
-        var result = new ScanResultDto(
-            new ParentInfoDto(parent.Id, parent.FullName),
-            parent.Children.Select(c => new ChildInfoDto(c.Id, c.FullName, c.Group)).ToList()
-        );
+            if (parent is null)
+                return ServiceResult<ScanResultDto>.Failure("Invalid QR code");
 
-        return ServiceResult<ScanResultDto>.Success(result);
+            var result = new ScanResultDto(
+                new ParentInfoDto(
+                    parent.Id, 
+                    parent.FirstName,
+                    parent.LastName,
+                    parent.Phone, 
+                    parent.Email, 
+                    dto.QrData,
+                    parent.Children.Where(c => c.IsActive).Select(c => c.Id.ToString()).ToList()
+                ),
+                parent.Children.Where(c => c.IsActive).Select(c => new ChildInfoDto(
+                    c.Id, 
+                    c.FirstName,
+                    c.LastName,
+                    c.DateOfBirth,
+                    new List<string> { parent.Id.ToString() },
+                    c.Allergies,
+                    c.EmergencyContact,
+                    c.MedicalNotes,
+                    string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(c.FirstName)}" : c.PhotoUrl
+                )).ToList()
+            );
+
+            return ServiceResult<ScanResultDto>.Success(result);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return ServiceResult<ScanResultDto>.Failure("Invalid QR code format");
+        }
     }
+
+    private record QrPayload(Guid family, string s);
 }

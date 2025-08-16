@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using ChurchAttendanceSystem.Application.Interfaces;
 using ChurchAttendanceSystem.Domain;
@@ -9,10 +10,33 @@ namespace ChurchAttendanceSystem.Application.Services;
 public class ChildService : IChildService
 {
     private readonly AppDb _db;
+    private readonly IEncryptionService _encryption;
 
-    public ChildService(AppDb db)
+    public ChildService(AppDb db, IEncryptionService encryption)
     {
         _db = db;
+        _encryption = encryption;
+    }
+
+    public async Task<ServiceResult<List<ChildInfoDto>>> GetChildrenAsync()
+    {
+        var children = await _db.Children
+            .Where(c => c.IsActive)
+            .Include(c => c.Parent)
+            .Select(c => new ChildInfoDto(
+                c.Id,
+                _encryption.Decrypt(c.FirstName),
+                _encryption.Decrypt(c.LastName),
+                c.DateOfBirth,
+                new List<string> { c.ParentId.ToString() },
+                _encryption.Decrypt(c.Allergies ?? ""),
+                _encryption.Decrypt(c.EmergencyContact ?? ""),
+                _encryption.Decrypt(c.MedicalNotes ?? ""),
+                string.IsNullOrEmpty(c.PhotoUrl) ? $"https://via.placeholder.com/150?text={Uri.EscapeDataString(c.FirstName)}" : c.PhotoUrl
+            ))
+            .ToListAsync();
+
+        return ServiceResult<List<ChildInfoDto>>.Success(children);
     }
 
     public async Task<ServiceResult<Guid>> CreateChildAsync(Guid parentId, CreateChildDto dto)
@@ -24,8 +48,13 @@ public class ChildService : IChildService
         {
             Id = Guid.NewGuid(),
             ParentId = parentId,
-            FullName = dto.FullName,
-            Group = dto.Group,
+            FirstName = _encryption.Encrypt(dto.FirstName),
+            LastName = _encryption.Encrypt(dto.LastName),
+            DateOfBirth = dto.DateOfBirth ?? "2020-01-01",
+            Allergies = _encryption.Encrypt(dto.Allergies ?? ""),
+            EmergencyContact = _encryption.Encrypt(dto.EmergencyContact ?? ""),
+            MedicalNotes = _encryption.Encrypt(dto.MedicalNotes ?? ""),
+            PhotoUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(dto.FirstName)}",
             IsActive = true
         };
 

@@ -20,6 +20,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChildService, ChildService>();
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddSingleton<IQrService, QrService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IEncryptionService, EncryptionService>();
+        services.AddMemoryCache();
 
         return services;
     }

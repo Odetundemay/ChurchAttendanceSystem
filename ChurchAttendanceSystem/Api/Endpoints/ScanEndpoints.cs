@@ -8,7 +8,7 @@ public static class ScanEndpoints
 {
     public static void MapScanEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/check").WithTags("QR Scanning");
+        var group = app.MapGroup("/api").WithTags("QR Scanning");
 
         group.MapPost("/scan", async (ScanDto dto, IParentService parentService) =>
         {

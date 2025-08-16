@@ -21,5 +21,15 @@ public static class AuthEndpoints
             var result = await authService.RegisterStaffAsync(dto);
             return result.ToHttpResult();
         }).RequireAuthorization("AdminOnly");
+
+        group.MapPost("/logout", async (HttpContext context, ITokenService tokenService) =>
+        {
+            var token = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            if (!string.IsNullOrEmpty(token))
+            {
+                await tokenService.BlacklistTokenAsync(token);
+            }
+            return Results.Ok(new { success = true });
+        }).RequireAuthorization();
     }
 }

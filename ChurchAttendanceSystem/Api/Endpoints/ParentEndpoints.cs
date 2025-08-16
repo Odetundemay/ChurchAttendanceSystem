@@ -16,9 +16,15 @@ public static class ParentEndpoints
             return result.ToHttpResult();
         }).RequireAuthorization("AdminOnly");
 
-        group.MapGet("/{id:guid}/qr", async (Guid id, IParentService parentService) =>
+        group.MapPost("/list", async (IParentService parentService) =>
         {
-            var result = await parentService.GenerateQrCodeAsync(id);
+            var result = await parentService.GetParentsAsync();
+            return result.ToHttpResult();
+        }).RequireAuthorization("Staff");
+
+        group.MapPost("/qr", async (QrRequestDto dto, IParentService parentService) =>
+        {
+            var result = await parentService.GenerateQrCodeAsync(dto.Id);
             if (result.IsSuccess)
                 return Results.File(result.Data!, "image/png");
             

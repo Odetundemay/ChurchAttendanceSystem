@@ -6,35 +6,19 @@ public static class ServiceResultExtensions
 {
     public static IResult ToHttpResult<T>(this ServiceResult<T> result)
     {
-        if (result.IsSuccess)
-        {
-            return result.StatusCode switch
-            {
-                201 => Results.Created("", result.Data),
-                _ => Results.Ok(result.Data)
-            };
-        }
-
-        return result.StatusCode switch
-        {
-            404 => Results.NotFound(new { error = result.ErrorMessage }),
-            409 => Results.Conflict(new { error = result.ErrorMessage }),
-            401 => Results.Json(new { error = result.ErrorMessage }, statusCode: 401),
-            _ => Results.BadRequest(new { error = result.ErrorMessage })
-        };
+        var apiResult = result.IsSuccess
+            ? ApiResult<T>.SuccessResult(result.Data!, result.StatusCode)
+            : ApiResult<T>.ErrorResult(result.ErrorMessage!, result.StatusCode);
+        
+        return Results.Json(apiResult, statusCode: result.StatusCode);
     }
 
     public static IResult ToHttpResult(this ServiceResult result)
     {
-        if (result.IsSuccess)
-            return Results.Ok(new { success = true });
-
-        return result.StatusCode switch
-        {
-            404 => Results.NotFound(new { error = result.ErrorMessage }),
-            409 => Results.Conflict(new { error = result.ErrorMessage }),
-            401 => Results.Json(new { error = result.ErrorMessage }, statusCode: 401),
-            _ => Results.BadRequest(new { error = result.ErrorMessage })
-        };
+        var apiResult = result.IsSuccess
+            ? ApiResult.SuccessResult(result.StatusCode)
+            : ApiResult.ErrorResult(result.ErrorMessage!, result.StatusCode);
+        
+        return Results.Json(apiResult, statusCode: result.StatusCode);
     }
 }

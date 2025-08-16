@@ -18,27 +18,27 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<ServiceResult<object>> LoginAsync(LoginDto dto)
+    public async Task<ServiceResult<LoginResponseDto>> LoginAsync(LoginDto dto)
     {
         var user = await _db.StaffUsers.FirstOrDefaultAsync(x => x.Email == dto.Email);
         
         if (user is null || !Password.Verify(dto.Password, user.PasswordHash))
-            return ServiceResult<object>.Unauthorized("Invalid email or password");
+            return ServiceResult<LoginResponseDto>.Unauthorized("Invalid email or password");
 
         var token = Jwt.IssueToken(user.Id, user.Email, user.Role, _configuration);
-        var response = new 
-        { 
-            token, 
-            user = new 
-            { 
-                user.Id, 
-                user.FullName, 
-                user.Email, 
-                user.Role 
-            } 
-        };
         
-        return ServiceResult<object>.Success(response);
+        var staffDto = new StaffDto(
+            user.Id.ToString(),
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            user.Role.ToLower(),
+            true
+        );
+        
+        var response = new LoginResponseDto(token, staffDto);
+        
+        return ServiceResult<LoginResponseDto>.Success(response);
     }
 
     public async Task<ServiceResult<Guid>> RegisterStaffAsync(RegisterStaffDto dto)
@@ -49,7 +49,8 @@ public class AuthService : IAuthService
         var user = new StaffUser
         {
             Id = Guid.NewGuid(),
-            FullName = dto.FullName,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
             Email = dto.Email,
             PasswordHash = Password.Hash(dto.Password),
             Role = string.IsNullOrWhiteSpace(dto.Role) ? "Staff" : dto.Role
