@@ -56,24 +56,28 @@ public class ParentService : IParentService
         return ServiceResult<Guid>.Success(parent.Id, 201);
     }
 
-    public async Task<ServiceResult<byte[]>> GenerateQrCodeAsync(Guid parentId)
+    public async Task<ServiceResult<object>> GetQrDataAsync(Guid parentId)
     {
         var parent = await _db.Parents.FindAsync(parentId);
         if (parent is null)
-            return ServiceResult<byte[]>.NotFound("Parent not found");
+            return ServiceResult<object>.NotFound("Parent not found");
 
-        var payload = new { family = parent.Id, s = parent.QrSecret };
-        var qrCode = _qrService.GeneratePng(payload);
-
-        return ServiceResult<byte[]>.Success(qrCode);
+        var qrData = new { family = parent.Id, s = parent.QrSecret };
+        return ServiceResult<object>.Success(qrData);
     }
 
     public async Task<ServiceResult<ScanResultDto>> ScanQrCodeAsync(ScanDto dto)
     {
         try
         {
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            };
+            
             // Parse the QR data JSON
-            var qrData = System.Text.Json.JsonSerializer.Deserialize<QrPayload>(dto.QrData);
+            var qrData = System.Text.Json.JsonSerializer.Deserialize<QrPayload>(dto.QrData, options);
             if (qrData == null)
                 return ServiceResult<ScanResultDto>.Failure("Invalid QR code format");
 
@@ -109,9 +113,9 @@ public class ParentService : IParentService
 
             return ServiceResult<ScanResultDto>.Success(result);
         }
-        catch (System.Text.Json.JsonException)
+        catch (System.Text.Json.JsonException ex)
         {
-            return ServiceResult<ScanResultDto>.Failure("Invalid QR code format");
+            return ServiceResult<ScanResultDto>.Failure($"Invalid QR code format: {ex.Message}");
         }
     }
 

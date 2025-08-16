@@ -34,5 +34,34 @@ public static class DatabaseInitializer
             
             Console.WriteLine($"Default admin created: {adminEmail} / {adminPassword}");
         }
+        
+        // Add test parent if none exist
+        if (!await db.Parents.AnyAsync())
+        {
+            var testParent = new Parent
+            {
+                Id = Guid.Parse("b2a4fe8b-a30c-4f00-8c99-b0fd75c6a106"),
+                FirstName = "John",
+                LastName = "Smith",
+                Phone = "555-0123",
+                Email = "john.smith@example.com",
+                QrSecret = "dGVzdFNlY3JldA=="
+            };
+            
+            var testChild = new Child
+            {
+                Id = Guid.NewGuid(),
+                ParentId = testParent.Id,
+                FirstName = "Emma",
+                LastName = "Smith",
+                DateOfBirth = "2018-05-15"
+            };
+            
+            db.Parents.Add(testParent);
+            db.Children.Add(testChild);
+            await db.SaveChangesAsync();
+            
+            Console.WriteLine("Test parent and child created for QR testing");
+        }
     }
 }

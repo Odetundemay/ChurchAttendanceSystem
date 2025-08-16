@@ -24,10 +24,7 @@ public static class ParentEndpoints
 
         group.MapPost("/qr", async (QrRequestDto dto, IParentService parentService) =>
         {
-            var result = await parentService.GenerateQrCodeAsync(dto.Id);
-            if (result.IsSuccess)
-                return Results.File(result.Data!, "image/png");
-            
+            var result = await parentService.GetQrDataAsync(dto.Id);
             return result.ToHttpResult();
         }).RequireAuthorization("AdminOnly");
 

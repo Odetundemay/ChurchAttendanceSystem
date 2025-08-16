@@ -7,6 +7,6 @@ public interface IParentService
 {
     Task<ServiceResult<List<ParentInfoDto>>> GetParentsAsync();
     Task<ServiceResult<Guid>> CreateParentAsync(CreateParentDto dto);
-    Task<ServiceResult<byte[]>> GenerateQrCodeAsync(Guid parentId);
+    Task<ServiceResult<object>> GetQrDataAsync(Guid parentId);
     Task<ServiceResult<ScanResultDto>> ScanQrCodeAsync(ScanDto dto);
 }
