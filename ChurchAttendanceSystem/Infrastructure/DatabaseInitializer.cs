@@ -13,11 +13,12 @@ public static class DatabaseInitializer
         var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         await db.Database.EnsureCreatedAsync();
         
-        if (!await db.StaffUsers.AnyAsync())
+        var adminEmail = config["DefaultAdmin:Email"] ?? "admin@church.com";
+        var adminPassword = config["DefaultAdmin:Password"] ?? "SecurePass123!";
+        
+        var existingAdmin = await db.StaffUsers.FirstOrDefaultAsync(u => u.Email == adminEmail);
+        if (existingAdmin == null)
         {
-            var adminEmail = config["DefaultAdmin:Email"] ?? "admin@church.com";
-            var adminPassword = config["DefaultAdmin:Password"] ?? Guid.NewGuid().ToString()[..8];
-            
             var admin = new StaffUser
             {
                 Id = Guid.NewGuid(),
@@ -32,6 +33,14 @@ public static class DatabaseInitializer
             await db.SaveChangesAsync();
             
             Console.WriteLine($"Default admin created: {adminEmail} / {adminPassword}");
+        }
+        else if (existingAdmin.Role != "Admin")
+        {
+            existingAdmin.Role = "Admin";
+            existingAdmin.PasswordHash = Password.Hash(adminPassword);
+            await db.SaveChangesAsync();
+            
+            Console.WriteLine($"Admin user updated: {adminEmail} / {adminPassword}");
         }
         
         // Add test parent if none exist
