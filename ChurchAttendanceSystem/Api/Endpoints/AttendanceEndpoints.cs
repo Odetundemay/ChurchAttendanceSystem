@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using ChurchAttendanceSystem.Application;
 using ChurchAttendanceSystem.Application.Interfaces;
 using ChurchAttendanceSystem.Application.Extensions;
+using ChurchAttendanceSystem.Infrastructure;
 using ChurchAttendanceSystem.Dto;
 
 namespace ChurchAttendanceSystem.Api.Endpoints;
