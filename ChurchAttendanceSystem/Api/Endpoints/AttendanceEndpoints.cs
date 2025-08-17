@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using ChurchAttendanceSystem.Application;
 using ChurchAttendanceSystem.Application.Interfaces;
 using ChurchAttendanceSystem.Application.Extensions;
 using ChurchAttendanceSystem.Dto;
@@ -11,7 +13,7 @@ public static class AttendanceEndpoints
     {
         var group = app.MapGroup("/api/attendance").WithTags("Attendance");
 
-        group.MapPost("/checkin", async (CheckInDto dto, ClaimsPrincipal user, IAttendanceService attendanceService, ILogger<Program> logger) =>
+        group.MapPost("/checkin", async (CheckInDto dto, ClaimsPrincipal user, IAttendanceService attendanceService, ILogger<Program> logger, AppDb db) =>
         {
             logger.LogInformation("CheckIn attempt for childId: {ChildId}", dto.ChildId);
             
@@ -24,6 +26,17 @@ public static class AttendanceEndpoints
 
             var staffId = Guid.Parse(staffIdStr);
             logger.LogInformation("CheckIn by staff: {StaffId}", staffId);
+            
+            // Debug: Check if staff exists
+            var staffExists = await db.StaffUsers.AnyAsync(s => s.Id == staffId);
+            logger.LogInformation("Staff exists in database: {StaffExists}", staffExists);
+            
+            if (!staffExists)
+            {
+                logger.LogError("Staff ID {StaffId} not found in database. Available staff IDs: {StaffIds}", 
+                    staffId, 
+                    string.Join(", ", await db.StaffUsers.Select(s => s.Id).ToListAsync()));
+            }
             
             var result = await attendanceService.CheckInAsync(dto, staffId);
             logger.LogInformation("CheckIn result: Success={Success}, Error={Error}", result.IsSuccess, result.ErrorMessage);
@@ -51,9 +64,14 @@ public static class AttendanceEndpoints
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
 
-        group.MapPost("/list", async (IAttendanceService attendanceService) =>
+        group.MapPost("/list", async (IAttendanceService attendanceService, ILogger<Program> logger) =>
         {
+            logger.LogInformation("Fetching attendance records");
             var result = await attendanceService.GetAttendanceRecordsAsync();
+            logger.LogInformation("Attendance records result: Success={Success}, Count={Count}, Error={Error}", 
+                result.IsSuccess, 
+                result.Data?.Count() ?? 0, 
+                result.ErrorMessage);
             return result.ToHttpResult();
         }).RequireAuthorization("Staff");
 

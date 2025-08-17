@@ -111,27 +111,50 @@ public class AttendanceService : IAttendanceService
 
     public async Task<ServiceResult<List<AttendanceRecordDto>>> GetAttendanceRecordsAsync()
     {
-        var recordsData = await _db.AttendanceRecords
-            .Include(r => r.Child)
-            .Include(r => r.Parent)
-            .OrderByDescending(r => r.CheckInTime)
-            .ToListAsync();
+        try
+        {
+            var recordsData = await _db.AttendanceRecords
+                .Include(r => r.Child)
+                .Include(r => r.Parent)
+                .OrderByDescending(r => r.CheckInTime)
+                .ToListAsync();
 
-        var records = recordsData.Select(r => new AttendanceRecordDto(
-            r.Id.ToString(),
-            r.ChildId.ToString(),
-            $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}",
-            r.ParentId.ToString(),
-            $"{r.Parent.FirstName} {r.Parent.LastName}",
-            r.CheckInTime,
-            r.CheckOutTime,
-            r.CheckInStaffId.ToString(),
-            r.CheckOutStaffId?.ToString(),
-            r.CheckInNotes ?? r.CheckOutNotes,
-            r.CheckInTime.ToString("yyyy-MM-dd")
-        )).ToList();
+            var records = new List<AttendanceRecordDto>();
+            
+            foreach (var r in recordsData)
+            {
+                try
+                {
+                    var childName = $"{_encryption.Decrypt(r.Child.FirstName)} {_encryption.Decrypt(r.Child.LastName)}";
+                    var parentName = $"{r.Parent.FirstName} {r.Parent.LastName}";
+                    
+                    records.Add(new AttendanceRecordDto(
+                        r.Id.ToString(),
+                        r.ChildId.ToString(),
+                        childName,
+                        r.ParentId.ToString(),
+                        parentName,
+                        r.CheckInTime,
+                        r.CheckOutTime,
+                        r.CheckInStaffId.ToString(),
+                        r.CheckOutStaffId?.ToString(),
+                        r.CheckInNotes ?? r.CheckOutNotes,
+                        r.CheckInTime.ToString("yyyy-MM-dd")
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    // Log decryption error but continue with other records
+                    Console.WriteLine($"Error processing record {r.Id}: {ex.Message}");
+                }
+            }
 
-        return ServiceResult<List<AttendanceRecordDto>>.Success(records);
+            return ServiceResult<List<AttendanceRecordDto>>.Success(records);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<List<AttendanceRecordDto>>.Failure($"Error fetching attendance records: {ex.Message}");
+        }
     }
 
     public async Task<ServiceResult<int>> MarkAttendanceAsync(MarkAttendanceDto dto, Guid staffId)
