@@ -7,7 +7,12 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5127",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Default": "Host=ep-sparkling-scene-af8jct7k-pooler.c-2.us-west-2.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_SUagF6JuEMA1;SSL Mode=Require;Channel Binding=require",
+        "Jwt__Secret": "ChurchAttendanceSystem2024SecretKey32CharMinimum!@#$%^&*()",
+        "Encryption__Key": "MyEncryptionKey1234567890123456",
+        "DefaultAdmin__Email": "admin@church.com",
+        "DefaultAdmin__Password": "SecurePass123!"
       }
     },
     "https": {
@@ -16,7 +21,12 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7090;http://localhost:5127",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Default": "Host=ep-sparkling-scene-af8jct7k-pooler.c-2.us-west-2.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_SUagF6JuEMA1;SSL Mode=Require;Channel Binding=require",
+        "Jwt__Secret": "ChurchAttendanceSystem2024SecretKey32CharMinimum!@#$%^&*()",
+        "Encryption__Key": "MyEncryptionKey1234567890123456",
+        "DefaultAdmin__Email": "admin@church.com",
+        "DefaultAdmin__Password": "SecurePass123!"
       }
     }
   }

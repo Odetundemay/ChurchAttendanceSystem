@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
     {
         // Database
         services.AddDbContext<AppDb>(options => 
-            options.UseSqlite(configuration.GetConnectionString("Default")));
+            options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         // Application Services
         services.AddScoped<IAuthService, AuthService>();
